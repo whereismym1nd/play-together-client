@@ -1,0 +1,1 @@
+export { GameSelectPage } from './tv/gameSelectPage';

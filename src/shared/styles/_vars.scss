@@ -1,0 +1,234 @@
+$color_black: #000000;
+$color_white: #fff;
+$color_yellow: #FBE300;
+$color_deamis_yellow: #FFED00;
+$color_dark_yellow: #FDD800;
+$color_orange: #F58120;
+
+$color_bg: $color_yellow;
+
+:root {
+  --header-height: 100px;
+}
+
+@media (min-width: 495px) {
+  :root {
+    --header-height: 127.73px;
+  }
+}
+
+$breakpoints: (
+  mobile: 0,
+  mobile_l: 495px,
+  tablet: 768px,
+  laptop: 1199px,
+  desktop: 1920px,
+);
+
+$font: "Panforte Pro", "system-ui", sans-serif;
+
+
+@keyframes fade-in-bottom {
+  0% {
+    -webkit-transform: translateY(50px);
+    transform: translateY(50px);
+    opacity: 0;
+  }
+
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@mixin fadeInBottom($duration: 1s, $delay: 0s) {
+  animation: fade-in-bottom $duration ease-out $delay;
+}
+
+@mixin scrollWithoutScroll() {
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+@mixin scrollWithoutScrollHorizontal() {
+  overflow-x: scroll;
+  -ms-overflow-style: none;
+  scrollbar-height: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    height: 0px;
+    background: transparent;
+  }
+}
+
+@mixin transition() {
+  transition: 0.2s;
+
+  &:hover {
+    transition: 0.05s;
+  }
+
+  &:hover {
+    transition: 0.02s;
+  }
+}
+
+@mixin simpleHover() {
+  @include transition();
+  opacity: 1;
+
+  &:focus,
+  &:hover {
+    opacity: 0.8 !important;
+  }
+
+  &:active {
+    opacity: 0.6 !important;
+  }
+}
+
+@mixin fadeInBase($duration: 1s, $delay: 0s) {
+  opacity: 0;
+  animation: fadeIn $duration ease-out $delay both;
+}
+
+@mixin fadeInBottomBase($duration: 1s, $delay: 0s) {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInBottom $duration ease-out $delay both;
+}
+
+@mixin scaleInBase($duration: 1s, $delay: 0s) {
+  transform: scale(0);
+  animation: scale-in-center $duration ease-out $delay both;
+}
+
+@keyframes scale-in-center {
+  0% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@mixin actions($margin: 4px) {
+  margin: -$margin;
+
+  &>* {
+    margin: $margin;
+  }
+}
+
+@mixin loadMask($dur: 1s, $delay: 0s, $opacity: 1, $br: 0.5rem) {
+  opacity: $opacity;
+  border-radius: $br;
+  overflow: hidden;
+  position: relative;
+
+  &:after {
+    $halfGr: $color_gray_alpha;
+    content: "";
+    background: linear-gradient(to right, $halfGr calc(100% / 3), transparent, $halfGr calc(100% / 3 * 2));
+    animation: loadMaskAnim #{$dur} #{$delay} infinite ease-in-out;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 300%;
+    pointer-events: none;
+  }
+}
+
+@keyframes loadMaskAnim {
+  0% {
+    translate: 0 0;
+  }
+
+  100% {
+    translate: calc(100% / -3 * 2) 0;
+  }
+}
+
+@function bp($name) {
+  @return map-get($breakpoints, $name);
+}
+
+@mixin up($name) {
+  @media (min-width: bp($name)) {
+    @content;
+  }
+}
+
+@mixin down($name) {
+  $val: bp($name);
+
+  @media (max-width: calc(#{$val} - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin between($from, $to) {
+  @media (min-width: bp($from)) and (max-width: calc(#{bp($to)} - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin mediaLaptop {
+  @media (max-width: 1440px) {
+    @content;
+  }
+}
+
+@mixin mediaLaptopSmall {
+  @media (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin mediaTablet {
+  @media (max-width: 820px) {
+    @content;
+  }
+}
+
+@mixin mediaMobile {
+  @media(max-width: 495px) {
+    @content;
+  }
+}

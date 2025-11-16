@@ -1,0 +1,158 @@
+@use "./_vars" as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: none;
+}
+
+html.is-dragging,
+body.is-dragging {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+html.is-dragging .game__area-wrapper {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+html.is-dragging .game {
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+input {
+  -webkit-appearance: none;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+textarea,
+input {
+  font-family: $font;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow: -moz-scrollbars-none;
+  // touch-action: none;
+}
+
+div {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+section {
+  position: relative;
+}
+
+
+body {
+  font-size: 16px;
+  font-family: $font;
+  line-height: 110%;
+  min-width: 360px;
+  color: $color_black;
+  background-color: $color_bg;
+  touch-action: pan-x pan-y;
+  scroll-behavior: smooth;
+}
+
+#__site_wrapper {
+  overflow: hidden;
+  min-height: calc(100vh * var(--zvh));
+  min-height: calc(100svh * var(--zsvh));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  transition: 0.2s;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.container {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+
+  @include up(tablet) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @include up(laptop) {
+    padding-left: 5.25rem;
+    padding-right: 5.25rem;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: $color_black;
+  @include transition();
+
+  &:focus,
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  max-width: 100%;
+  width: 100%;
+  user-select: none;
+}
