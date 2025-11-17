@@ -1,4 +1,4 @@
-import type { GameDefinition, GameId } from "./_core/types";
+import type { GameDefinition, GameId } from "../shared/types/gameTypes";
 import { billiardsDefinition } from "./billiards";
 // import { raceDefinition } from "./race";
 

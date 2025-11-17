@@ -4,7 +4,7 @@ import { Container as PixiContainer, Graphics as PixiGraphics } from "pixi.js";
 
 import { useBilliardsScreenLogic } from "../logic/useBilliardsScreenLogic";
 import { PerformanceStatsWidget } from "../../../widgets/fps-stats/PerformanceStatsWidget";
-import type { GameScreenProps } from "../../_core/types";
+import type { GameScreenProps } from "../../../shared/types/gameTypes";
 
 extend({
   Container: PixiContainer,

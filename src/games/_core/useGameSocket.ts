@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { type Role } from "./types";
+import { type Role } from "../../shared/types/gameTypes";
 
 const DEFAULT_URL =
   typeof window !== "undefined"

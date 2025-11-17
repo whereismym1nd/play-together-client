@@ -1,8 +1,8 @@
 import { type ComponentType } from "react";
 
-export type GameId = "billiards" | "race"; // можно расширять
+export type GameId = "billiards" | "race";
 
-export type Role = "screen" | "controller";
+export type Role = "screen" | "host" | "controller";
 
 export interface GameScreenProps {
   roomId: string;

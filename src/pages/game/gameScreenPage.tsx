@@ -1,4 +1,3 @@
-// src/app/pages/GameScreenPage.tsx
 import { useParams, useSearchParams } from "react-router-dom";
 import { gamesMapById } from "../../games";
 
@@ -9,7 +8,6 @@ export function GameScreenPage() {
 
   if (!game) return <div>Не указана игра</div>;
 
-  // типизация: game as GameId, если нужно
   const descriptor = gamesMapById[game as keyof typeof gamesMapById];
 
   if (!descriptor) {

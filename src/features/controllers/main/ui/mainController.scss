@@ -1,0 +1,63 @@
+.dpad {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* базовый стиль кнопок */
+.dpad__btn {
+  position: absolute;
+  background: #f2f4f7;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* центр */
+.center {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ВЕРХ */
+.up {
+  width: 60px;
+  height: 80px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* НИЗ */
+.down {
+  width: 60px;
+  height: 80px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  clip-path: inherit;
+}
+
+/* ЛЕВО */
+.left {
+  width: 80px;
+  height: 60px;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  clip-path: inherit;
+}
+
+/* ПРАВО */
+.right {
+  width: 80px;
+  height: 60px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  clip-path: inherit;
+}

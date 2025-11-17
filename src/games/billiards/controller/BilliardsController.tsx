@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import type { GameControllerProps } from "../../_core/types";
+import type { GameControllerProps } from "../../../shared/types/gameTypes";
 import { useGameSocket } from "../../_core/useGameSocket";
 
 const MAX_DRAG_PX = 140;
