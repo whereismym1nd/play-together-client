@@ -1,1 +1,7 @@
-export { GameSelectPage } from './tv/gameSelectPage';
+export * from './gameSelect/GameSelectScreenPage'
+export * from './gameSelect/GameSelectControllerPage'
+export * from './game/gameControllerPage'
+export * from './game/gameScreenPage'
+export * from './main/MainPage'
+export * from './roomLobby/RoomLobbyControllerPage'
+export * from './roomLobby/roomLobbyScreenPage'

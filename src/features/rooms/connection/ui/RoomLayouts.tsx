@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import { RoomConnectionProvider, useRoomConnection } from "./RoomConnectionProvider";
+import { RoomConnectionProvider, useRoomConnection } from "../model/RoomConnectionProvider";
 
 type RoomRouteParams = {
   roomId?: string;

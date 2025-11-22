@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { type Role } from "../../shared/types/gameTypes";
-
-const DEFAULT_URL =
-  typeof window !== "undefined"
-    ? `${window.location.protocol}//${window.location.hostname}:3000`
-    : "http://localhost:3000";
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? DEFAULT_URL;
+import { CONFIG } from "../../shared/config/config";
 
 export function useGameSocket(roomId: string, gameId: string, role: Role) {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const s = io(SOCKET_URL);
+    const s = io(CONFIG.SOCKET_URL);
     setSocket(s);
 
     s.on("connect", () => {

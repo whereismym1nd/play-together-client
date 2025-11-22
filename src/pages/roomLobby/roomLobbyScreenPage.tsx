@@ -1,8 +1,13 @@
+import { useNavigate, useParams } from "react-router-dom";
 import { QRCodeConnection } from "../../widgets/qrCodeRoom/QRCodeConnection";
-import { useRoomConnection } from "../../features/rooms/RoomConnectionProvider";
+import { useOnStartGameSelect, useRoomConnection } from "@/features/rooms";
 
 export const RoomLobbyScreenPage = () => {
   const { room } = useRoomConnection();
+  const { roomId } = useParams<{ roomId: string }>();
+  const navigate = useNavigate();
+  useOnStartGameSelect(() => navigate(`/room/${roomId}/select-game`));
+
 
   return (
     <div>

@@ -1,6 +1,6 @@
+import type { Role } from "@/shared/types";
 import { useEffect } from "react";
 import type { Socket } from "socket.io-client";
-import type { Role } from "../../shared/types/gameTypes";
 
 type UsePlayerReadyParams = {
   role: Role;
