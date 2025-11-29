@@ -5,6 +5,7 @@ export interface Player {
   name?: string;
   role: PlayerRole;
   ready?: boolean;
+  offline?: boolean;
 }
 
 export interface Room {
@@ -12,6 +13,9 @@ export interface Room {
   screenId?: string;
   players: Player[];
   gameType?: GameType;
+  stage?: RoomStage;
 }
 
 export type GameType = 'billiards' | 'chess';
+
+export type RoomStage = 'lobby' | 'select' | 'game';

@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type CSSProperties,
@@ -8,7 +9,7 @@ import {
 } from "react";
 import type { Socket } from "socket.io-client";
 import type { Role } from "../../../../shared/types/gameTypes";
-import type { Room } from "../../../../shared/types";
+import type { Room, RoomStage } from "../../../../shared/types";
 import { useRoomSocket } from "./useRoomSocket";
 import { usePlayerReady } from "./actions/usePlayerReady";
 
@@ -22,6 +23,7 @@ type RoomConnectionContextValue = {
   isHost: boolean;
   isReady: boolean;
   setIsReady: (ready: boolean) => void;
+  stage: RoomStage;
 };
 
 const RoomConnectionContext = createContext<RoomConnectionContextValue | null>(null);
@@ -41,6 +43,7 @@ export function RoomConnectionProvider({
 }: RoomConnectionProviderProps) {
   const [playerName, setPlayerName] = useState<string | undefined>(initialName);
   const [isReady, setIsReady] = useState<boolean>(false);
+  const [stage, setStage] = useState<RoomStage>("lobby");
   const { room, socket, error } = useRoomSocket(role, roomId, { name: playerName });
   usePlayerReady({ role, socket, roomId: room?.id ?? roomId, isReady });
   const resolvedRoomId = room?.id ?? roomId;
@@ -51,6 +54,28 @@ export function RoomConnectionProvider({
       (player) => player.id === socket.id && player.role === "host",
     );
   }, [room, socket?.id]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleStartSelect = () => setStage("select");
+    socket.on("room:startGameSelect", handleStartSelect);
+    return () => {
+      socket.off("room:startGameSelect", handleStartSelect);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (room?.stage) {
+      setStage(room.stage);
+      return;
+    }
+
+    if (room?.gameType) {
+      setStage("game");
+    } else if (room) {
+      setStage((prev) => (prev === "game" ? "lobby" : prev));
+    }
+  }, [room?.stage, room?.gameType, room]);
 
   const value = useMemo<RoomConnectionContextValue>(
     () => ({
@@ -63,8 +88,9 @@ export function RoomConnectionProvider({
       isHost,
       isReady,
       setIsReady,
+      stage,
     }),
-    [room, socket, playerName, isHost, isReady, error],
+    [room, socket, playerName, isHost, isReady, error, stage],
   );
 
   return (
@@ -79,6 +105,7 @@ export function RoomConnectionProvider({
         isHost={isHost}
         isReady={isReady}
         error={error}
+        stage={stage}
       />
     </RoomConnectionContext.Provider>
   );
@@ -101,6 +128,7 @@ type RoomDevBoxProps = {
   isHost: boolean;
   isReady: boolean;
   error: string | null;
+  stage: RoomStage;
 };
 
 function RoomDevBox({
@@ -112,21 +140,26 @@ function RoomDevBox({
   isHost,
   isReady,
   error,
+  stage,
 }: RoomDevBoxProps) {
   const players = room?.players ?? [];
   const placeholder = "-";
   const resolvedRoomId = room?.id ?? roomId ?? placeholder;
   const connectionState = socket ? (socket.connected ? "connected" : "connecting") : "idle";
   const playerLines = players.length
-    ? players.map((player) => {
+    ? players.map((player, index) => {
         const isYou = player.id === socket?.id;
         const isScreen = player.id === room?.screenId;
         const ready = player.ready ? "ready" : "not ready";
         const name = player.name ?? placeholder;
+        const key = player.id ?? `${player.role}-${index}`;
 
-        return `${player.role}${isYou ? " (you)" : ""}${isScreen ? " [screen]" : ""}: ${name} (${ready})`;
+        return {
+          key,
+          text: `${player.role}${isYou ? " (you)" : ""}${isScreen ? " [screen]" : ""}: ${name} (${ready})`,
+        };
       })
-    : ["no players"];
+    : [{ key: "empty", text: "no players" }];
 
   const boxStyle: CSSProperties = {
     position: "fixed",
@@ -153,13 +186,14 @@ function RoomDevBox({
       <div>socket: {socket?.id ?? placeholder}</div>
       <div>roomId: {resolvedRoomId}</div>
       <div>game: {room?.gameType ?? placeholder}</div>
+      <div>stage: {stage}</div>
       <div>playerName: {playerName ?? placeholder}</div>
       <div>host: {isHost ? "yes" : "no"}</div>
       <div>ready: {isReady ? "yes" : "no"}</div>
       <div>players:</div>
       <div style={{ marginLeft: 8, whiteSpace: "pre-wrap" }}>
         {playerLines.map((line) => (
-          <div key={line}>{line}</div>
+          <div key={line.key}>{line.text}</div>
         ))}
       </div>
       {error ? <div style={{ color: "#f87171" }}>error: {error}</div> : null}

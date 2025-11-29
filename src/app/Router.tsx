@@ -6,6 +6,7 @@ import { RoomLobbyControllerPage } from "../pages/roomLobby/RoomLobbyControllerP
 import { ControllerRoomLayout, ScreenRoomLayout } from "../features/rooms/connection/ui/RoomLayouts";
 import { RoomLobbyScreenPage } from "../pages/roomLobby/roomLobbyScreenPage";
 import { GameSelectControllerPage, GameSelectScreenPage } from "@/pages";
+import { useRoomConnection } from "@/features/rooms";
 
 export function AppRouter() {
   return (
@@ -13,16 +14,26 @@ export function AppRouter() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route element={<ScreenRoomLayout />}>
-          <Route path="/room/:roomId" element={<RoomLobbyScreenPage />} />
-          <Route path="/room/:roomId/select-game" element={<GameSelectScreenPage />} />
-          <Route path="/game/:roomId/:game" element={<GameScreenPage />} />
+          <Route path="/room/:roomId" element={<ScreenRoomStage />} />
         </Route>
         <Route element={<ControllerRoomLayout />}>
-          <Route path="/room/:roomId/controller" element={<RoomLobbyControllerPage />} />
-          <Route path="/room/:roomId/select-game/controller" element={<GameSelectControllerPage />} />
-          <Route path="/game/:roomId/:game/controller" element={<GameControllerPage />} />
+          <Route path="/room/:roomId/controller" element={<ControllerRoomStage />} />
         </Route>
       </Routes>
     </BrowserRouter>
   );
+}
+
+function ScreenRoomStage() {
+  const { stage } = useRoomConnection();
+  if (stage === "select") return <GameSelectScreenPage />;
+  if (stage === "game") return <GameScreenPage />;
+  return <RoomLobbyScreenPage />;
+}
+
+function ControllerRoomStage() {
+  const { stage } = useRoomConnection();
+  if (stage === "select") return <GameSelectControllerPage />;
+  if (stage === "game") return <GameControllerPage />;
+  return <RoomLobbyControllerPage />;
 }

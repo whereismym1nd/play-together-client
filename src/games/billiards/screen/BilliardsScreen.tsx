@@ -36,6 +36,7 @@ export const BilliardsScreen: React.FC<GameScreenProps> = ({ roomId }) => {
         width={canvasSize.width}
         height={canvasSize.height}
         background={"#0b5155"}
+        resizeTo={window}
       >
         <pixiContainer
           x={canvasSize.width / 2}

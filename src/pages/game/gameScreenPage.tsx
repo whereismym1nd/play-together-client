@@ -1,17 +1,20 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useRoomConnection } from "@/features/rooms";
 import { gamesMapById } from "../../games";
 
 export function GameScreenPage() {
-  const { game } = useParams<{ game: string }>();
-  const [searchParams] = useSearchParams();
-  const roomId = searchParams.get("room") || "DEBUG_ROOM";
+  const { roomId: roomIdParam, game: gameParam } = useParams<{ roomId?: string; game?: string }>();
+  const { room } = useRoomConnection();
 
-  if (!game) return <div>Не указана игра</div>;
+  const roomId = room?.id ?? roomIdParam ?? "DEBUG_ROOM";
+  const gameId = gameParam ?? room?.gameType;
 
-  const descriptor = gamesMapById[game as keyof typeof gamesMapById];
+  if (!gameId) return <div>Игра не выбрана</div>;
+
+  const descriptor = gamesMapById[gameId as keyof typeof gamesMapById];
 
   if (!descriptor) {
-    return <div>Игра "{game}" не найдена</div>;
+    return <div>Игра "{gameId}" не найдена</div>;
   }
 
   const Screen = descriptor.Screen;

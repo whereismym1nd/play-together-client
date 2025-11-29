@@ -1,15 +1,13 @@
-import { useOnStartGameSelect, useRoomConnection, useRoomStart } from "@/features/rooms";
+import { useRoomConnection, useRoomStart } from "@/features/rooms";
 import { Button } from "@/shared/ui";
 import { type FormEvent, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const RoomLobbyControllerPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const navigate = useNavigate();
   const [nameInput, setNameInput] = useState("");
   const { room, socket, playerName, setPlayerName, isHost, setIsReady, error } = useRoomConnection();
   const { startRoom, isStarting, error: startError } = useRoomStart();
-  useOnStartGameSelect(() => navigate(`/room/${roomId}/select-game/controller`));
 
   const everyoneReady = useMemo(() => {
     if (!room) return false;
@@ -27,10 +25,7 @@ export const RoomLobbyControllerPage = () => {
   };
 
   const handleStart = () => {
-    startRoom(() => {
-      const target = `/room/${room?.id ?? roomId}/select-game/controller`;
-      navigate(target);
-    });
+    startRoom();
   };
 
   if (error) {

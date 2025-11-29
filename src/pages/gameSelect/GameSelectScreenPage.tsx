@@ -1,18 +1,27 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { gamesMapById } from "../../games";
 import { useGameSelectHighlight, useRoomConnection } from "@/features/rooms";
 
 export const GameSelectScreenPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { socket, room, isHost } = useRoomConnection();
-  const navigate = useNavigate();
-  const games = Object.values(gamesMapById);
+  const { socket, room } = useRoomConnection();
+  const [error, setError] = useState<string | null>(null);
+  const games = useMemo(() => Object.values(gamesMapById), []);
+  const targetRoomId = room?.id ?? roomId;
 
   const handleSelect = (gameId: string) => {
-    if (!socket || !roomId) return;
-    socket.emit("room:selectGame", { roomId, gameId }, (res?: { success?: boolean }) => {
-      if (res?.success !== false) navigate(`/game/${gameId}?room=${roomId}`);
-    });
+    if (!socket || !targetRoomId) return;
+    setError(null);
+    socket.emit(
+      "room:selectGame",
+      { roomId: targetRoomId, gameId },
+      (res?: { success?: boolean; message?: string }) => {
+        if (res?.success === false) {
+          setError(res.message ?? "Failed to select game");
+        }
+      },
+    );
   };
 
   const { selectedIndex, setSelectedIndex } = useGameSelectHighlight({
@@ -25,7 +34,8 @@ export const GameSelectScreenPage = () => {
 
   return (
     <div>
-      <h1>Выбор игры для комнаты {room?.id ?? roomId}</h1>
+      <h1>Game selection for room {room?.id ?? roomId}</h1>
+      {error ? <div style={{ color: "red" }}>{error}</div> : null}
       <ul>
         {games.map(({ id, name }, idx) => (
           <li key={id}>
@@ -36,7 +46,7 @@ export const GameSelectScreenPage = () => {
               }}
               aria-pressed={selectedIndex === idx}
             >
-              {selectedIndex === idx ? "👉 " : ""}
+              {selectedIndex === idx ? "> " : ""}
               {name}
             </button>
           </li>
