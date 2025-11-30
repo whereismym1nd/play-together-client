@@ -8,7 +8,7 @@ import { drawBilliardsWorldPixi } from "../view/billiardsRenderer";
 import { usePlanckSimulation } from "../../../shared/simulation/usePlankCanvasSimulation";
 import { BALL_R, MAX_PULL, SCALE } from "../config";
 import { useSimulationPerformanceMonitor } from "../../../widgets/fps-stats/useSimulationPerformanceMonitor";
-import { useGameSocket } from "../../_core/useGameSocket";
+import { useRoomConnection } from "@/features/rooms";
 
 type PointerHandlers = {
   onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
@@ -29,7 +29,11 @@ export function useBilliardsScreenLogic(roomId: string) {
     pointer: null,
   });
   const { stats: performanceStats, reportSample } = useSimulationPerformanceMonitor();
-  const socket = useGameSocket(roomId, "billiards", "screen");
+  const { socket } = useRoomConnection();
+  useEffect(() => {
+    // Reset aim state when switching rooms to avoid leaking input between sessions.
+    aimStateRef.current = { active: false, pointer: null };
+  }, [roomId]);
 
   const isAllowToShoot = useCallback(() => {
     const velocity = cueBallRef?.current?.getLinearVelocity();

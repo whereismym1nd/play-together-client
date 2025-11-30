@@ -4,10 +4,10 @@ import { gamesMapById } from "../../games";
 
 export function GameControllerPage() {
   const { roomId: roomIdParam, game: gameParam } = useParams<{ roomId?: string; game?: string }>();
-  const { room } = useRoomConnection();
+  const { room, gameType } = useRoomConnection();
 
   const roomId = room?.id ?? roomIdParam ?? "DEBUG_ROOM";
-  const gameId = gameParam ?? room?.gameType;
+  const gameId = gameParam ?? gameType ?? room?.gameType;
 
   if (!gameId) return <div>Игра не выбрана</div>;
 

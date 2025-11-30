@@ -1,4 +1,3 @@
-// billiardsRenderPixi.ts
 import * as planck from "planck";
 import type { Graphics as PixiGraphics } from "pixi.js";
 import { SCALE, TABLE_HEIGHT, TABLE_WIDTH } from "../config";

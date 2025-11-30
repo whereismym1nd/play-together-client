@@ -1,4 +1,3 @@
-// shared/simulation/usePlanckCanvasSimulation.ts
 import { useEffect, type RefObject, useRef } from "react";
 import * as planck from "planck";
 import {

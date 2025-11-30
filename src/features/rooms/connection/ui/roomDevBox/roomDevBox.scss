@@ -1,0 +1,30 @@
+.room-dev-box {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  padding: 8px 10px;
+  background: rgba(12, 18, 28, 0.9);
+  color: #e5e7eb;
+  font-family: Menlo, Consolas, Monaco, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 9999;
+  max-width: 260px;
+  pointer-events: none;
+}
+
+.room-dev-box__title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.room-dev-box__players {
+  margin-left: 8px;
+  white-space: pre-wrap;
+}
+
+.room-dev-box__error {
+  color: #f87171;
+}
