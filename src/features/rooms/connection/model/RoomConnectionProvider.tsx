@@ -48,6 +48,15 @@ export function RoomConnectionProvider({
   usePlayerReady({ role, socket, roomId: room?.id ?? roomId, isReady });
   const resolvedRoomId = room?.id ?? roomId;
 
+  useEffect(() => {
+    if (playerName) return;
+    if (!room || !socket?.id) return;
+    const me = room.players.find((p) => p.id === socket.id);
+    if (me?.name) {
+      setPlayerName(me.name);
+    }
+  }, [room, socket?.id, playerName]);
+
   const isHost = useMemo(() => {
     if (!room || !socket?.id) return false;
     return room.players.some(

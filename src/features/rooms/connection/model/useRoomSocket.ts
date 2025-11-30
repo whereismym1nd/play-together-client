@@ -22,6 +22,11 @@ export function useRoomSocket(
   const latestNameRef = useRef(name);
 
   useEffect(() => {
+    console.log(room);
+  }, [room])
+
+
+  useEffect(() => {
     if (roomId && roomIdRef.current !== roomId) {
       roomIdRef.current = roomId;
       setHasJoined(false);
@@ -37,7 +42,10 @@ export function useRoomSocket(
 
   useEffect(() => {
     const s = io(CONFIG.SOCKET_URL, {
-      auth: { sessionId: localStorage.getItem('sessionId') ?? undefined },
+      auth: {
+        sessionId: localStorage.getItem('sessionId') ?? undefined,
+        roomId: roomIdRef.current,
+      },
     });
     setSocket(s);
 

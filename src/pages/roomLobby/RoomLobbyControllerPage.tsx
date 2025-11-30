@@ -6,6 +6,9 @@ import { useParams } from "react-router-dom";
 export const RoomLobbyControllerPage = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const [nameInput, setNameInput] = useState("");
+  const [editPlayerId, setEditPlayerId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
+  const [editError, setEditError] = useState<string | null>(null);
   const { room, socket, playerName, setPlayerName, isHost, setIsReady, error } = useRoomConnection();
   const { startRoom, isStarting, error: startError } = useRoomStart();
 
@@ -28,6 +31,44 @@ export const RoomLobbyControllerPage = () => {
     startRoom();
   };
 
+  const openEdit = (playerId: string, currentName?: string) => {
+    setEditPlayerId(playerId);
+    setEditValue(currentName ?? "");
+    setEditError(null);
+  };
+
+  const closeEdit = () => {
+    setEditPlayerId(null);
+    setEditValue("");
+    setEditError(null);
+  };
+
+  const submitEdit = () => {
+    if (!socket || !room || !editPlayerId) return;
+    const trimmed = editValue.trim();
+    if (!trimmed) {
+      setEditError("Имя не может быть пустым");
+      return;
+    }
+
+    socket.emit(
+      "player:rename",
+      { roomId: room.id, name: trimmed },
+      (response?: { success?: boolean; message?: string }) => {
+        if (response?.success) {
+          if (editPlayerId === socket.id) {
+            setPlayerName(trimmed);
+          }
+          closeEdit();
+        } else if (response?.message) {
+          setEditError(response.message);
+        } else {
+          setEditError("Не удалось обновить имя");
+        }
+      },
+    );
+  };
+
   if (error) {
     return <div>{error}</div>;
   }
@@ -40,7 +81,7 @@ export const RoomLobbyControllerPage = () => {
     return (
       <form onSubmit={handleSubmit}>
         <label>
-          Введите имя
+          Ваше имя
           <input
             value={nameInput}
             onChange={(event) => setNameInput(event.target.value)}
@@ -60,7 +101,7 @@ export const RoomLobbyControllerPage = () => {
       {!room && <p>Комнату ещё создаём...</p>}
       {room && (
         <>
-          <p>{isHost ? "Вы хост комнаты" : "Вы участник комнаты"}</p>
+          <p>{isHost ? "Вы хост" : "Вы игрок"}</p>
 
           <section>
             <h2>Игроки</h2>
@@ -71,6 +112,14 @@ export const RoomLobbyControllerPage = () => {
                   {player.role === "host" ? " (хост)" : ""}
                   {player.id === socket?.id ? " — это вы" : ""}
                   {player.ready ? " ✅" : " ⏳"}
+                  {player.id === socket?.id && (
+                    <Button
+                      type="secondary"
+                      onClick={() => openEdit(player.id, player.name)}
+                    >
+                      Редактировать
+                    </Button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -88,14 +137,67 @@ export const RoomLobbyControllerPage = () => {
                 onClick={handleStart}
                 isDisabled={!everyoneReady || isStarting}
               >
-                Старт
+                Начать
               </Button>
               {startError && <p>{startError}</p>}
-              {!everyoneReady && <p>Все игроки (кроме экрана) должны нажать «Готов».</p>}
+              {!everyoneReady && <p>Не все готовы (кроме хоста) — дождитесь галочек.</p>}
             </section>
           )}
         </>
       )}
+      {editPlayerId ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              background: "#0c121c",
+              color: "#e5e7eb",
+              padding: "16px",
+              borderRadius: 8,
+              minWidth: 280,
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            <div style={{ fontWeight: 700 }}>Изменить имя</div>
+            <input
+              value={editValue}
+              onChange={(event) => setEditValue(event.target.value)}
+              placeholder="Новое имя"
+              style={{
+                padding: "8px 10px",
+                borderRadius: 6,
+                border: "1px solid rgba(255,255,255,0.2)",
+                background: "rgba(255,255,255,0.05)",
+                color: "#e5e7eb",
+              }}
+            />
+            {editError ? (
+              <div style={{ color: "#f87171", fontSize: 12 }}>{editError}</div>
+            ) : null}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <Button type="secondary" onClick={closeEdit}>
+                Отмена
+              </Button>
+              <Button type="secondary" onClick={submitEdit}>
+                Сохранить
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

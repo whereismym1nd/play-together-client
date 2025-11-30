@@ -17,7 +17,7 @@ export function AppRouter() {
           <Route path="/room/:roomId" element={<ScreenRoomStage />} />
         </Route>
         <Route element={<ControllerRoomLayout />}>
-          <Route path="/room/:roomId/controller" element={<ControllerRoomStage />} />
+          <Route path="/room/:roomId/ctrl" element={<ControllerRoomStage />} />
         </Route>
       </Routes>
     </BrowserRouter>
