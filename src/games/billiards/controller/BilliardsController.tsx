@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./billiardsController.scss";
-import type { GameControllerProps } from "../../../shared/types/gameTypes";
 import { useRoomConnection } from "@/features/rooms";
+import type { GameControllerProps } from "@/shared/types";
 
 const MAX_DRAG_PX = 140;
 
@@ -36,7 +36,10 @@ export const BilliardsController: React.FC<GameControllerProps> = ({ roomId }) =
   const emitAim = useCallback(
     (power: number, angle: number) => {
       if (!socket) return;
-      socket.emit("cue:aim", { roomId: activeRoomId, power, angle });
+      socket.emit("game-event", {
+        type: "cue:aim",
+        data: { roomId: activeRoomId, power, angle },
+      });
     },
     [socket, activeRoomId]
   );
@@ -44,7 +47,10 @@ export const BilliardsController: React.FC<GameControllerProps> = ({ roomId }) =
   const emitShoot = useCallback(
     (power: number, angle: number) => {
       if (!socket) return;
-      socket.emit("cue:shoot", { roomId: activeRoomId, power, angle });
+      socket.emit("game-event", {
+        type: "cue:shoot",
+        data: { roomId: activeRoomId, power, angle },
+      });
     },
     [socket, activeRoomId]
   );
@@ -172,7 +178,7 @@ export const BilliardsController: React.FC<GameControllerProps> = ({ roomId }) =
           <div
             className="billiards__controller-arrow"
             style={{
-              transform: `translate(-50%, -50%) rotate(${arrowAngleDeg}deg)`,
+              transform: `translateY(-50%) rotate(${arrowAngleDeg}deg)`,
               opacity: Math.max(0.4, dragState.power),
             }}
           >

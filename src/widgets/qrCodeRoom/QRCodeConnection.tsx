@@ -4,7 +4,7 @@ import { CONFIG } from '../../shared/config/config';
 type QRCodeProps = { value: string };
 
 export const QRCodeConnection = ({ value }: QRCodeProps) => {
-  const connectionURL = `${CONFIG.LOCALHOST_URL}/room/${value}/controller`;
+  const connectionURL = `${CONFIG.LOCALHOST_URL}/room/${value}/ctrl`;
   return (
     <>
       <QRCode value={connectionURL} size={256} />

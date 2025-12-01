@@ -13,6 +13,7 @@ export type UsePlanckSimulationOptions = {
   renderWorld: (world: planck.World) => void;
   fixedDelta?: number;
   maxSubSteps?: number;
+  renderFps?: number;
   onMetrics?: (metrics: SimulationMetrics) => void;
 };
 
@@ -26,6 +27,7 @@ export function usePlanckSimulation({
   step,
   fixedDelta = 1 / 60,
   maxSubSteps = 5,
+  renderFps,
   onMetrics,
 }: UsePlanckSimulationOptions) {
   const simRef = useRef<SimulationLoop | null>(null);
@@ -40,9 +42,17 @@ export function usePlanckSimulation({
           world.step(dt);
         }
       },
-      render: (world) => {
-        renderWorld(world);
-      },
+      render: (() => {
+        if (!renderFps) return (world: planck.World) => renderWorld(world);
+        let lastRender = 0;
+        const minInterval = 1000 / renderFps;
+        return (world: planck.World) => {
+          const now = performance.now();
+          if (now - lastRender < minInterval) return;
+          lastRender = now;
+          renderWorld(world);
+        };
+      })(),
       onMetrics,
       fixedDelta,
       maxSubSteps,

@@ -36,7 +36,8 @@ export function useBilliardsScreenLogic(roomId: string) {
   }, [roomId]);
 
   const isAllowToShoot = useCallback(() => {
-    const velocity = cueBallRef?.current?.getLinearVelocity();
+    const cueBall = cueBallRef.current;
+    const velocity = cueBall?.getLinearVelocity();
     if (!velocity) return false;
 
     const speed = velocity.length();
@@ -97,10 +98,24 @@ export function useBilliardsScreenLogic(roomId: string) {
     return world;
   }, []);
 
+  const resolveCueBall = useCallback(() => {
+    const world = worldRef.current;
+    if (!world) return null;
+    for (let body = world.getBodyList(); body; body = body.getNext()) {
+      const data = body.getUserData() as { type?: string; isCue?: boolean; render?: { fill?: string } } | undefined;
+      if (data?.type === "ball" && (data.isCue || data.render?.fill === "white")) {
+        cueBallRef.current = body;
+        return body;
+      }
+    }
+    cueBallRef.current = null;
+    return null;
+  }, []);
+
   const drawWorld = useCallback(
     (graphics: PixiGraphics | null, world: planck.World | null) => {
       if (!graphics || !world) return;
-      const cuePos = cueBallRef.current?.getPosition();
+      const cuePos = resolveCueBall()?.getPosition();
       const aimState = aimStateRef.current;
       const aimOverlay =
         cuePos && aimState.active && aimState.pointer
@@ -113,7 +128,7 @@ export function useBilliardsScreenLogic(roomId: string) {
 
   const setAimFromDirection = useCallback(
     (power: number, angle: number) => {
-      const cueBall = cueBallRef.current;
+      const cueBall = resolveCueBall();
       if (!cueBall) return;
       const normalized = Math.max(0, Math.min(1, power));
 
@@ -140,7 +155,7 @@ export function useBilliardsScreenLogic(roomId: string) {
 
   const applyShotFromDirection = useCallback(
     (power: number, angle: number) => {
-      const cueBall = cueBallRef.current;
+      const cueBall = resolveCueBall();
       if (!cueBall) return;
       if (!isAllowToShoot()) return;
       const normalized = Math.max(0, Math.min(1, power));
@@ -193,7 +208,7 @@ export function useBilliardsScreenLogic(roomId: string) {
   );
 
   const applyShot = useCallback(() => {
-    const cueBall = cueBallRef.current;
+    const cueBall = resolveCueBall();
     const pointer = aimStateRef.current.pointer;
     if (!cueBall || !pointer) return;
 
@@ -221,24 +236,25 @@ export function useBilliardsScreenLogic(roomId: string) {
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
       if (!isAllowToShoot()) return;
-      if (!cueBallRef.current) return;
+      const cueBall = resolveCueBall();
+      if (!cueBall) return;
       refreshParentRect();
       const pointer = clientToWorld(event.clientX, event.clientY);
       if (!pointer) return;
 
-      const cuePos = cueBallRef.current.getPosition();
+      const cuePos = cueBall.getPosition();
       const dx = pointer.x - cuePos.x;
       const dy = pointer.y - cuePos.y;
       const distance = Math.hypot(dx, dy);
 
       if (distance <= BALL_R * 1.2) {
-        cueBallRef.current.setLinearVelocity(planck.Vec2(0, 0));
-        cueBallRef.current.setAngularVelocity(0);
+        cueBall.setLinearVelocity(planck.Vec2(0, 0));
+        cueBall.setAngularVelocity(0);
         event.currentTarget.setPointerCapture(event.pointerId);
         updateAimState({ active: true, pointer });
       }
     },
-    [clientToWorld, updateAimState, isAllowToShoot, refreshParentRect]
+    [clientToWorld, updateAimState, isAllowToShoot, refreshParentRect, resolveCueBall]
   );
 
   const handlePointerMove = useCallback(
@@ -299,6 +315,8 @@ export function useBilliardsScreenLogic(roomId: string) {
       socket.off("cue:shoot", handleCueShoot);
     };
   }, [socket, setAimFromDirection, applyShotFromDirection]);
+
+  if (performance.now() % 5000 < 16) console.log('bodies', worldRef.current?.getBodyCount());
 
   return {
     wrapperRef: parentRef,

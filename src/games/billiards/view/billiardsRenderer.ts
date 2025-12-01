@@ -1,5 +1,5 @@
 import * as planck from "planck";
-import type { Graphics as PixiGraphics } from "pixi.js";
+import { Assets, Graphics as PixiGraphics, Rectangle, Texture } from "pixi.js";
 import { SCALE, TABLE_HEIGHT, TABLE_WIDTH } from "../config";
 
 export type AimOverlay = {
@@ -13,7 +13,50 @@ type BallRender = { fill: string; stroke?: string };
 type BallUserData = {
   type: "ball";
   render: BallRender;
+  id?: number;
+  isCue?: boolean;
 };
+
+const BALL_SPRITE_SIZE = 32;
+let BALL_TEXTURES: Texture[] | null = null;
+let BALL_TEXTURES_PROMISE: Promise<void> | null = null;
+
+const ensureBallTextures = () => {
+  if (BALL_TEXTURES) return BALL_TEXTURES;
+
+  if (!BALL_TEXTURES_PROMISE) {
+    BALL_TEXTURES_PROMISE = Assets.load("/assets/games/billiards/balls.png")
+      .then((loaded) => {
+        // Assets.load в v8 возвращает Texture
+        const baseTex = loaded as Texture;
+        const source = baseTex.source;
+
+        BALL_TEXTURES = Array.from({ length: 16 }, (_, i) => {
+          const col = i % 8;
+          const row = (i / 8) | 0;
+
+          return new Texture({
+            source,
+            frame: new Rectangle(
+              col * BALL_SPRITE_SIZE,
+              row * BALL_SPRITE_SIZE,
+              BALL_SPRITE_SIZE,
+              BALL_SPRITE_SIZE
+            ),
+            // ОРИГИНАЛ и TRIM НЕ ТРОГАЕМ, они по умолчанию (0,0,w,h)
+            defaultAnchor: { x: 0.5, y: 0.5 },
+          });
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to load billiards ball textures", err);
+        BALL_TEXTURES = [];
+      });
+  }
+
+  return BALL_TEXTURES;
+};
+
 
 export function drawBilliardsWorldPixi(
   g: PixiGraphics,
@@ -47,10 +90,19 @@ export function drawBilliardsWorldPixi(
         const r = circle.m_radius * SCALE;
 
         if (tag === "ball" && bodyData?.type === "ball") {
-          const fillColor = bodyData.render.fill;
+          const textures = ensureBallTextures();
+          const textureIndex = bodyData.id ?? 0;
+          const tex = textures?.[textureIndex] ?? textures?.[0];
 
           g.circle(x, y, r);
-          g.fill(fillColor);
+
+          if (tex) {
+            g.fill(tex);
+          } else {
+            const fillColor =
+              typeof bodyData.render === "object" ? bodyData.render.fill : "#ffffff";
+            g.fill(fillColor);
+          }
         } else if (tag === "pocket") {
           g.circle(x, y, r);
           g.fill(0x000000);

@@ -1,9 +1,8 @@
 import * as planck from "planck";
 import { BALL_R, POCKET_R, TABLE_HEIGHT, TABLE_WIDTH } from "../config";
 
-
 type BallRender = { fill: string };
-type BallUserData = { type: "ball"; render: BallRender };
+type BallUserData = { type: "ball"; render: BallRender; isCue?: boolean; id: number };
 
 export function createBilliardsWorld(): { world: planck.World; cueBallBody: planck.Body } {
   const pl = planck;
@@ -35,20 +34,17 @@ export function createBilliardsWorld(): { world: planck.World; cueBallBody: plan
 
   const world = new pl.World({});
 
-  const scaleVec2 = (sx: number, sy: number) =>
-    (v: planck.Vec2): planck.Vec2 =>
-      new planck.Vec2(v.x * sx, v.y * sy);
-
+  const scaleVec2 =
+    (sx: number, sy: number) =>
+      (v: planck.Vec2): planck.Vec2 =>
+        new planck.Vec2(v.x * sx, v.y * sy);
 
   (pl as any).internal.Settings.velocityThreshold = 0;
 
   const railH = [
     new Vec2(POCKET_R, TABLE_HEIGHT * 0.5),
     new Vec2(POCKET_R, TABLE_HEIGHT * 0.5 + POCKET_R),
-    new Vec2(
-      TABLE_WIDTH * 0.5 - POCKET_R / SPI4 + POCKET_R,
-      TABLE_HEIGHT * 0.5 + POCKET_R
-    ),
+    new Vec2(TABLE_WIDTH * 0.5 - POCKET_R / SPI4 + POCKET_R, TABLE_HEIGHT * 0.5 + POCKET_R),
     new Vec2(TABLE_WIDTH * 0.5 - POCKET_R / SPI4, TABLE_HEIGHT * 0.5),
   ];
 
@@ -56,12 +52,9 @@ export function createBilliardsWorld(): { world: planck.World; cueBallBody: plan
     new Vec2(TABLE_WIDTH * 0.5, -(TABLE_HEIGHT * 0.5 - POCKET_R / SPI4)),
     new Vec2(
       TABLE_WIDTH * 0.5 + POCKET_R,
-      -(TABLE_HEIGHT * 0.5 - POCKET_R / SPI4 + POCKET_R)
+      -(TABLE_HEIGHT * 0.5 - POCKET_R / SPI4 + POCKET_R),
     ),
-    new Vec2(
-      TABLE_WIDTH * 0.5 + POCKET_R,
-      TABLE_HEIGHT * 0.5 - POCKET_R / SPI4 + POCKET_R
-    ),
+    new Vec2(TABLE_WIDTH * 0.5 + POCKET_R, TABLE_HEIGHT * 0.5 - POCKET_R / SPI4 + POCKET_R),
     new Vec2(TABLE_WIDTH * 0.5, TABLE_HEIGHT * 0.5 - POCKET_R / SPI4),
   ];
 
@@ -90,94 +83,67 @@ export function createBilliardsWorld(): { world: planck.World; cueBallBody: plan
   };
 
   // борта
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railV.map(scaleVec2(+1, +1))), railFixDef);
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railV.map(scaleVec2(-1, +1))), railFixDef);
+  world.createBody().createFixture(new planck.Polygon(railV.map(scaleVec2(+1, +1))), railFixDef);
+  world.createBody().createFixture(new planck.Polygon(railV.map(scaleVec2(-1, +1))), railFixDef);
 
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railH.map(scaleVec2(+1, +1))), railFixDef);
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railH.map(scaleVec2(-1, +1))), railFixDef);
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railH.map(scaleVec2(+1, -1))), railFixDef);
-  world
-    .createBody()
-    .createFixture(new planck.Polygon(railH.map(scaleVec2(-1, -1))), railFixDef);
-
+  world.createBody().createFixture(new planck.Polygon(railH.map(scaleVec2(+1, +1))), railFixDef);
+  world.createBody().createFixture(new planck.Polygon(railH.map(scaleVec2(-1, +1))), railFixDef);
+  world.createBody().createFixture(new planck.Polygon(railH.map(scaleVec2(+1, -1))), railFixDef);
+  world.createBody().createFixture(new planck.Polygon(railH.map(scaleVec2(-1, -1))), railFixDef);
 
   // лузы
   world
     .createBody()
     .createFixture(
       new planck.Circle(planck.Vec2(0, -TABLE_HEIGHT * 0.5 - POCKET_R * 1.5), POCKET_R),
-      pocketFixDef
+      pocketFixDef,
     );
   world
     .createBody()
     .createFixture(
       new planck.Circle(planck.Vec2(0, TABLE_HEIGHT * 0.5 + POCKET_R * 1.5), POCKET_R),
-      pocketFixDef
+      pocketFixDef,
     );
 
   world
     .createBody()
     .createFixture(
       new planck.Circle(
-        new planck.Vec2(
-          +TABLE_WIDTH * 0.5 + POCKET_R * 0.7,
-          +TABLE_HEIGHT * 0.5 + POCKET_R * 0.7
-        ),
-        POCKET_R
+        new planck.Vec2(+TABLE_WIDTH * 0.5 + POCKET_R * 0.7, +TABLE_HEIGHT * 0.5 + POCKET_R * 0.7),
+        POCKET_R,
       ),
-      pocketFixDef
+      pocketFixDef,
     );
   world
     .createBody()
     .createFixture(
       new planck.Circle(
-        new planck.Vec2(
-          -TABLE_WIDTH * 0.5 - POCKET_R * 0.7,
-          +TABLE_HEIGHT * 0.5 + POCKET_R * 0.7
-        ),
-        POCKET_R
+        new planck.Vec2(-TABLE_WIDTH * 0.5 - POCKET_R * 0.7, +TABLE_HEIGHT * 0.5 + POCKET_R * 0.7),
+        POCKET_R,
       ),
-      pocketFixDef
+      pocketFixDef,
     );
 
   world
     .createBody()
     .createFixture(
       new planck.Circle(
-        new planck.Vec2(
-          +TABLE_WIDTH * 0.5 + POCKET_R * 0.7,
-          -TABLE_HEIGHT * 0.5 - POCKET_R * 0.7
-        ),
-        POCKET_R
+        new planck.Vec2(+TABLE_WIDTH * 0.5 + POCKET_R * 0.7, -TABLE_HEIGHT * 0.5 - POCKET_R * 0.7),
+        POCKET_R,
       ),
-      pocketFixDef
+      pocketFixDef,
     );
   world
     .createBody()
     .createFixture(
       new planck.Circle(
-        new planck.Vec2(
-          -TABLE_WIDTH * 0.5 - POCKET_R * 0.7,
-          -TABLE_HEIGHT * 0.5 - POCKET_R * 0.7
-        ),
-        POCKET_R
+        new planck.Vec2(-TABLE_WIDTH * 0.5 - POCKET_R * 0.7, -TABLE_HEIGHT * 0.5 - POCKET_R * 0.7),
+        POCKET_R,
       ),
-      pocketFixDef
+      pocketFixDef,
     );
 
-  const balls = rack(BALL_R, SPI3).map(
-    (v) => new planck.Vec2(v.x + TABLE_WIDTH / 4, v.y)
-  );
+  const balls = rack(BALL_R, SPI3).map((v) => new planck.Vec2(v.x + TABLE_WIDTH / 4, v.y));
   balls.push({ x: -TABLE_WIDTH / 4, y: 0 } as planck.Vec2);
 
   if (COLORED) {
@@ -203,9 +169,52 @@ export function createBilliardsWorld(): { world: planck.World; cueBallBody: plan
     }
 
     const fixture = ballBody.createFixture(new planck.Circle(BALL_R), ballFixDef);
-    ballBody.setUserData({ type: "ball", render } satisfies BallUserData);
+    ballBody.setUserData({ type: "ball", render, isCue: render.fill === "white", id: i } satisfies BallUserData);
     fixture.setUserData("ball");
   }
+
+  const isPositionFree = (x: number, y: number) => {
+    const minDist = BALL_R * 2.2;
+    const minDistSq = minDist * minDist;
+    for (let body = world.getBodyList(); body; body = body.getNext()) {
+      const data = body.getUserData() as BallUserData | undefined;
+      if (data?.type !== "ball") continue;
+      const pos = body.getPosition();
+      const dx = pos.x - x;
+      const dy = pos.y - y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < minDistSq) return false;
+    }
+    return true;
+  };
+
+  const spawnCueBall = () => {
+    const baseX = -TABLE_WIDTH / 4;
+    const baseY = 0;
+    const step = BALL_R * 2.5;
+    const positions: Array<{ x: number; y: number }> = [
+      { x: baseX, y: baseY },
+      { x: baseX + step, y: baseY },
+      { x: baseX - step, y: baseY },
+      { x: baseX, y: baseY + step },
+      { x: baseX, y: baseY - step },
+    ];
+
+    for (const pos of positions) {
+      if (!isPositionFree(pos.x, pos.y)) continue;
+      const newCue = world.createBody(ballBodyDef);
+      newCue.setPosition(planck.Vec2(pos.x, pos.y));
+      const fixture = newCue.createFixture(new planck.Circle(BALL_R), ballFixDef);
+      // reuse id 0 for cue ball
+      newCue.setUserData({ type: "ball", render: WHITE, isCue: true, id: 0 } satisfies BallUserData);
+      fixture.setUserData("ball");
+      newCue.setLinearVelocity(planck.Vec2(0, 0));
+      newCue.setAngularVelocity(0);
+      cueBallBody = newCue;
+      return true;
+    }
+    return false;
+  };
 
   // попадание в лузу
   world.on("post-solve", (contact) => {
@@ -229,7 +238,14 @@ export function createBilliardsWorld(): { world: planck.World; cueBallBody: plan
 
     if (ballBody) {
       setTimeout(() => {
+        const isCue = ballBody === cueBallBody;
         world.destroyBody(ballBody!);
+        if (isCue) {
+          const spawned = spawnCueBall();
+          if (!spawned) {
+            cueBallBody = null;
+          }
+        }
       }, 1);
     }
   });
@@ -251,8 +267,8 @@ function rack(r: number, SPI3: number): planck.Vec2[] {
       balls.push(
         new planck.Vec2(
           i * l + Math.random() * r * 0.02,
-          (j - i * 0.5) * d + Math.random() * r * 0.02
-        )
+          (j - i * 0.5) * d + Math.random() * r * 0.02,
+        ),
       );
     }
   }

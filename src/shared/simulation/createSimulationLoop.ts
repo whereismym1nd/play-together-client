@@ -12,22 +12,11 @@ export type SimulationMetrics = {
 };
 
 export type SimulationOptions<TWorld> = {
-  // �?�?���?���'�? �?��? (���>���?��, �?�?�?�� �?�+�?���', �ؑ'�? �?�?�?�?�?�?)
   createWorld: () => TWorld;
-
-  // �?�?��? �?��?�?�>�?�Ő�?�?�?�<�� �?���? (�?�+�<�ؐ?�? world.step)
   step: (world: TWorld, dt: number) => void;
-
-  // �?�'�?��?�?�?���
   render?: (world: TWorld) => void;
-
-  // �"���?��?�?�?���?�?�<�� �?���? �? �?���?�?�?���: (1/60 ���? �?�?�?�>�ؐ��?��?)
   fixedDelta?: number;
-
-  // �?����?��?�?�? ���?�?�?���?�?�? ���� ����?�? (���?�'��-�>���?)
   maxSubSteps?: number;
-
-  // �?���Ő�?�?���>�?�?�<�� �:�?���
   onStart?: (world: TWorld) => void;
   onStop?: (world: TWorld) => void;
   onMetrics?: (metrics: SimulationMetrics) => void;
@@ -65,9 +54,10 @@ export function createSimulationLoop<TWorld>(
     const dt = (time - lastTime) / 1000;
     lastTime = time;
 
-    accumulator += dt;
+    // позволяем чуть больше накапливать, чтобы сгладить просадки, но не больше ~2 кадров запаса
+    const cappedDt = Math.min(dt, fixedDelta * maxSubSteps * 2);
+    accumulator = Math.min(accumulator + cappedDt, fixedDelta * maxSubSteps * 2);
 
-    // �?��?��?�>�?��? ���?�?�?���?�?�? ���?�� �>���?��, �ؑ'�?�+�< �?�� �?�����?��:���>���?�? �"�������
     let subSteps = 0;
     let physicsMs = 0;
     while (accumulator >= fixedDelta && subSteps < maxSubSteps) {
@@ -124,4 +114,3 @@ export function createSimulationLoop<TWorld>(
     isRunning: () => running,
   };
 }
-

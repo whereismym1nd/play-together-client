@@ -6,7 +6,7 @@ export const GameSelectControllerPage = () => {
   const { isHost } = useRoomConnection();
 
   if (!isHost) {
-    return <div>Только ведущий может управлять выбором игры.</div>;
+    return <div>Ведущий выбирает игру.</div>;
   }
 
   return (
